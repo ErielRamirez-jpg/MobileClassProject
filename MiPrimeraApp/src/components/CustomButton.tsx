@@ -1,36 +1,34 @@
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { Text, TouchableOpacity, StyleSheet } from "react-native";
 
-//Tipados
 type CustomButtonProps = {
-    //tipos de datos primitivos
     title: string;
     onPress: () => void;
-    //tipo: union de literales
+    //tipo: union de literales 
     variant?: "primary" | "secondary" | "tertiary";
+    //tipo: literal
+    //variant: "primary"
+};
+
+export default function CustomButton({title, onPress, variant='primary'}: CustomButtonProps) {
+  const styles = getStyles(variant);
+    return (
+  <TouchableOpacity style={styles.button} onPress={onPress}>
+        <Text style={styles.buttonText} > {title} </Text>
+  </TouchableOpacity>);
 }
 
-//funcion base con el import, onPress es un metodo
-export default function CustomButton ({title, onPress, variant='primary'}:CustomButtonProps){
-    const styles = getStyles(variant);
-
-    return(<TouchableOpacity style={styles.button} onPress={onPress}>
-        <Text style = {styles.buttonText}> {title} </Text>
-    </TouchableOpacity>);
-}
-
-const getStyles = (variant: "primary" | "secondary" | "tertiary") => 
-    
+const getStyles = (variant: "primary" | "secondary" | "tertiary") =>
     StyleSheet.create({
     button:{
-        width:150,
         borderRadius: 6,
         //operador ternario
         backgroundColor: variant === "primary" ? 'navy' : 
-        variant === "secondary" ? 'gray' : "#fff",
-        padding: 12,
+                            variant === "secondary" ? 'gray' : 
+                            "#fff ",
+        padding:12,
+        width: 150,
     },
-
     buttonText:{
-        color: variant=== "tertiary" ? 'black':'#fff'
+        color: variant === "tertiary" ? "#0000" : "#fff"
     }
 })
