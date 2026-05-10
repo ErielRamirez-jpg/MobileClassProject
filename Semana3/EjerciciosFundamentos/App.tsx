@@ -22,7 +22,7 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="auto" />
 
-      //Ejercicio 1
+      {/*Ejercicio 1*/}
       <View style={styles.listaContainer}>
         <Text style={styles.tituloLista}>Nombre:</Text>
       <TextInput style={styles.inputCustom}
@@ -37,7 +37,7 @@ export default function App() {
       </View>
 
       
-        //Ejercicio 2
+        {/*Ejercicio 2*/}
       <View style={styles.listaContainer}>
         <Text style={styles.tituloLista}>Edad:</Text>
         <TextInput style = {styles.inputCustom} placeholder="Ingresa tu edad aqui" 
@@ -52,7 +52,7 @@ export default function App() {
         }
       </View>
       
-        //Ejercicio 3
+        {/*Ejercicio 3*/}
       <View style={styles.listaContainer}>
         <Text style={styles.tituloLista}>Productos:</Text>
         {productos.map((producto) => (
@@ -71,6 +71,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor:'white',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
