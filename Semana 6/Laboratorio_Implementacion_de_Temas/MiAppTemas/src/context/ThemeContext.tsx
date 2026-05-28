@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-// Paleta de colores para el tema claro
 const lightColors = {
   background: '#FFFFFF',
   surface: '#F5F5F5',
@@ -12,7 +11,6 @@ const lightColors = {
   cardBorder: '#E0E0E0',
 };
 
-// Paleta de colores para el tema oscuro
 const darkColors = {
   background: '#121212',
   surface: '#1E1E1E',
