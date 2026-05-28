@@ -2,21 +2,20 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-//Arreglo
+// Arreglo
 const productos = [
-  {id:1, nombre:'Laptop Acer', precio:1200},
-  {id:2, nombre:'PS2', precio:100},
-  {id:3, nombre:'Mouse', precio:30}
-]
+  { id: 1, nombre: 'Laptop Acer', precio: 1200 },
+  { id: 2, nombre: 'PS2', precio: 100 },
+  { id: 3, nombre: 'Mouse', precio: 30 },
+];
 
 export default function App() {
+  const nombre = (nombrePersona: string) => {
+    return `Bienvenido ${nombrePersona}`;
+  };
 
-  const nombre = (nombrePersona :string) => {
-    return `Bienvenido ${nombrePersona} (delete: System32)`;
-  }
-
-  const [name, setName] = useState("");
-  const [edad, setEdad] = useState(0);
+  const [name, setName] = useState('');
+  const [edad, setEdad] = useState<number>(0);
 
   return (
     <View style={styles.container}>
@@ -25,49 +24,54 @@ export default function App() {
       {/*Ejercicio 1*/}
       <View style={styles.listaContainer}>
         <Text style={styles.tituloLista}>Nombre:</Text>
-      <TextInput style={styles.inputCustom}
-        placeholder="Escribe tu nombre aquí"
-        value={name}
-        onChangeText={setName}
-      />
-      
-      {name === "" ? null : 
-      <Text style={styles.textCustom}>{nombre(name)}</Text>
-        }
-      </View>
-
-      
-        {/*Ejercicio 2*/}
-      <View style={styles.listaContainer}>
-        <Text style={styles.tituloLista}>Edad:</Text>
-        <TextInput style = {styles.inputCustom} placeholder="Ingresa tu edad aqui" 
-        value={edad.toString()} 
-        onChangeText={(texto) => setEdad(Number(texto))}
+        <TextInput
+          style={styles.inputCustom}
+          placeholder="Escribe tu nombre aquí"
+          value={name}
+          onChangeText={setName}
         />
 
-        {edad >= 21 ? <Text style={styles.textCustom}>Mayor de edad</Text> :
-          edad >0 && edad<21 ? <Text style={styles.textCustom}>Menor de edad</Text> :
-          <Text></Text>
+        {name === '' ? null : <Text style={styles.textCustom}>{nombre(name)}</Text>}
 
-        }
+
       </View>
-      
-        {/*Ejercicio 3*/}
+
+      {/*Ejercicio 2*/}
+      <View style={styles.listantainer}>
+        <Text style={styles.tituloLista}>Edad:</Text>
+        <TextInput
+          style={styles.inputCustom}
+          placeholder="Ingresa tu edad aquí"
+          value={String(edad)}
+          keyboardType="numeric"
+          onChangeText={(texto) => {
+            const n = Number(texto);
+            setEdad(Number.isNaN(n) ? 0 : n);
+          }}
+        />
+
+        {edad >= 21 ? (
+          <Text style={styles.textCustom}>Mayor de edad</Text>
+        ) : edad > 0 && edad < 21 ? (
+          <Text style={styles.textCustom}>Menor de edad</Text>
+        ) : null}
+      </View>
+
+      {/*Ejercicio 3*/}
       <View style={styles.listaContainer}>
         <Text style={styles.tituloLista}>Productos:</Text>
         {productos.map((producto) => (
           <View key={producto.id} style={styles.productoItem}>
             <Text style={styles.textProducto}>
-               {producto.nombre} - <Text>${producto.precio}</Text>
+              {producto.nombre} - ${producto.precio}
             </Text>
           </View>
-
         ))}
       </View>
-      
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
