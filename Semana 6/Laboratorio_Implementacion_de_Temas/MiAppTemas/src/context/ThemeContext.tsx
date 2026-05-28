@@ -24,20 +24,16 @@ const darkColors = {
   cardBorder: '#444444',
 };
 
-// Tipo inferido de los colores
 export type ThemeColors = typeof lightColors;
 
-// Tipo del valor que expone el Context
 type ThemeContextType = {
   isDark: boolean;
   colors: ThemeColors;
   toggleTheme: () => void;
 };
 
-// Crea el Context
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Provider: envuelve la app y provee el tema a todos los hijos
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(false);
   const colors = isDark ? darkColors : lightColors;
@@ -50,7 +46,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook personalizado para consumir el Context de forma segura
 export function useTheme() {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useTheme debe usarse dentro de ThemeProvider');
