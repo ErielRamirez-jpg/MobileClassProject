@@ -1,10 +1,17 @@
 import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthProvider } from "./src/contexts/AuthContext";
+import StackNavigator from "./src/navigation/StackNavigator";
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      {/* La navegación e incisos la configurare en los siguientes pasos */}
+      <AuthProvider>
+        <NavigationContainer>
+          <StackNavigator />
+        </NavigationContainer>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
