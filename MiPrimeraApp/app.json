@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MiPrimeraApp",
-    "slug": "MiPrimeraApp",
+    "name": "MiAppMovil",
+    "slug": "MiAppMovil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

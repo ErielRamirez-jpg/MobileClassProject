@@ -1,6 +1,7 @@
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { TextInput, TouchableOpacity, View, Text, StyleSheet, KeyboardTypeOptions } from "react-native";
+import { useTheme } from "../contexts/ThemeContext";
 
 type Props = {
     type?: "text" | "email" | "password" | "number";
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export default function CustomInput ({type = "text", placeholder, value, onChange}: Props){
+    const {colors} = useTheme();
     const [isSecureText, setIsSecureText] = useState(type === 'password');
     const isPasswordField = type === 'password'; 
 
@@ -31,13 +33,20 @@ export default function CustomInput ({type = "text", placeholder, value, onChang
     return(
         //wrapper
          <View style={styles.wrapper}>
-            <View style={[styles.inputContainer, error && styles.inputError]}>
-                <MaterialIcons name={icon as any} size={22} color ="#000000"/>
+            <View style={[
+                styles.inputContainer,
+                {
+                    backgroundColor: colors.inputBackground,
+                    borderColor: error ? colors.error : colors.border
+                }
+            ]}>
+                <MaterialIcons name={icon as any} size={22} color={colors.textSecondary}/>
                 <TextInput 
                     placeholder={placeholder}
+                    placeholderTextColor={colors.textSecondary}
                     value={value}
                     onChangeText={onChange}
-                    style={styles.input}
+                    style={[styles.input, {color: colors.text}]}
                     secureTextEntry={isSecureText}
                     keyboardType={keyboardType}
                 />
@@ -48,12 +57,15 @@ export default function CustomInput ({type = "text", placeholder, value, onChang
                     }
                 }
                 >
-                    <Ionicons name={isSecureText ? "eye" : "eye-off"} size={22} />
+                    <Ionicons 
+                        name={isSecureText ? "eye" : "eye-off"} 
+                        size={22}
+                        color={colors.textSecondary} />
                 </TouchableOpacity>}
             </View>
             {
             error && 
-                <Text style ={styles.inputError} > {error} </Text>
+                <Text style ={[styles.inputError, {color: colors.error}]} > {error} </Text>
             }
          </View>
 
