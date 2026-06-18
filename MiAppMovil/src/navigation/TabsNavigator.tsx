@@ -5,25 +5,26 @@ import ProductsScreen from "../screens/ProductsScreen";
 import RoutinesScreen from "../screens/RoutinesScreen";
 import ProfileScreen from "../screens/UserSettings/ProfileScreen";
 import SettingsScreen from "../screens/UserSettings/SettingsScreen";
+// Importa la nueva pantalla
+import StorageScreen from "../screens/StorageScreen"; 
 import { useTheme } from "../contexts/ThemeContext";
 
-//1. declarar tipado para pantallas y sus parametros
 type TabsParamList = {
   Home: undefined;
   Products: undefined;
   Routines: undefined;
+  // Agrega la pestaña al tipado
+  Storage: undefined; 
   Profile: undefined;
   Settings: undefined;
 };
 
-//2. crear el tabs navigator el cual se va a manejar la navegacion por pestañas
 const Tab = createBottomTabNavigator<TabsParamList>();
 
-//3. utilizar el tab navigator
 export type { TabsParamList };
 
 export default function TabNavigator() {
-  const {colors} = useTheme();
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -32,8 +33,10 @@ export default function TabNavigator() {
           backgroundColor: colors.tabBarBackground,
           borderTopColor: colors.tabBarBackground,
         },
-        headerStyle:{ backgroundColor: colors.headerBackground},
-        headerTintColor: colors.headerText
+        headerStyle: {
+          backgroundColor: colors.headerBackground,
+        },
+        headerTintColor: colors.headerText,
       }}
     >
       <Tab.Screen
@@ -42,19 +45,26 @@ export default function TabNavigator() {
         options={{
           title: "Inicio",
           headerShown: true,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
+      
+      {/* PESTAÑA AÑADIDA PARA EVALUAR TU ACTIVIDAD PRÁCTICA */}
+      <Tab.Screen
+        name="Storage"
+        component={StorageScreen}
+        options={{
+          title: "Nube",
+          tabBarIcon: ({ color, size }) => <Ionicons name="cloud-upload" size={size} color={color} />,
+        }}
+      />
+
       <Tab.Screen
         name="Products"
         component={ProductsScreen}
         options={{
           title: "Productos",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flask" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="flask" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -62,9 +72,7 @@ export default function TabNavigator() {
         component={RoutinesScreen}
         options={{
           title: "Rutinas",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -72,9 +80,7 @@ export default function TabNavigator() {
         component={ProfileScreen}
         options={{
           title: "Mi Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -82,9 +88,7 @@ export default function TabNavigator() {
         component={SettingsScreen}
         options={{
           title: "Configuración",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>
