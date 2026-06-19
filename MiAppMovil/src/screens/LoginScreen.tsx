@@ -7,7 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { i18n } from "../contexts/LanguageContext";
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState("mjsalinas@unitec.edu");
+  const [email, setEmail] = useState("rafaelito@gmail.com");
   const [password, setPassword] = useState("");
 
   const { login, loginWithGoogle } = useAuth();

@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system"; // Importación limpia unificada
-import { decode } from "base64-arraybuffer";
+// Importación del submódulo legacy oficial de Expo para asegurar estabilidad en transferencias nativas
+import * as FileSystem from "expo-file-system/legacy"; 
 import { supabase } from "../services/supabaseClient";
 import { env } from "../config/env";
 import { useTheme } from "../contexts/ThemeContext";
@@ -22,10 +22,10 @@ export default function StorageScreen() {
   const [fileUri, setFileUri] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  // Estado indicador del ActivityIndicator de carga
+  // Estado indicador de carga
   const [uploading, setUploading] = useState<boolean>(false);
 
-  // 1. Funcionalidad: Abrir la galería del dispositivo con verificación de permisos
+  // 1. Funcionalidad: Abrir la galería del dispositivo
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -35,7 +35,7 @@ export default function StorageScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
     });
@@ -43,14 +43,12 @@ export default function StorageScreen() {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImage = result.assets[0];
       setImageUri(selectedImage.uri);
-      
-      // Asignar nombre con fallback por si viene vacío
       const name = selectedImage.fileName || `imagen_${Date.now()}.jpg`;
       setImageName(name);
     }
   };
 
-  // 2. Funcionalidad: Abrir el explorador de archivos del sistema (*/* para cualquier tipo)
+  // 2. Funcionalidad: Abrir el explorador de archivos del sistema
   const pickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -69,32 +67,47 @@ export default function StorageScreen() {
     }
   };
 
-  // Lógica de Negocio Central: Lectura local en Base64, conversión a ArrayBuffer y subida
-  const uploadToSupabase = async (uri: string, originalName: string, folder: string) => {
-    // Generar nombre de archivo único uniendo la carpeta destino, un timestamp y el nombre limpio
+  // Lógica de Transferencia Nativa Binaria corregida para iOS/Android
+  const uploadToSupabaseNative = async (uri: string, originalName: string, folder: string) => {
     const uniqueName = `${folder}/${Date.now()}_${originalName.replace(/\s+/g, "_")}`;
+    const fileExtension = originalName.split('.').pop()?.toLowerCase();
     
-    // Leer el archivo local usando la cadena literal "base64" para evitar fallos de tipos entre versiones
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: "base64",
+    // Determinar el Content-Type correcto de forma explícita
+    let contentType = "application/octet-stream";
+    if (folder === "images") {
+      contentType = "image/jpeg";
+    } else if (fileExtension === "pdf") {
+      contentType = "application/pdf";
+    }
+
+    // Extraer credenciales dinámicamente de la instancia activa de Supabase
+    const supabaseUrl = (supabase as any).supabaseUrl;
+    const supabaseAnonKey = (supabase as any).supabaseKey;
+
+    // Construcción de la URL de subida para la API REST de Supabase Storage
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/${env.supabaseBucket}/${uniqueName}`;
+
+    // Ejecución de subida nativa utilizando el mapeo numérico directo (0 = BINARY_CONTENT)
+    const response = await FileSystem.uploadAsync(uploadUrl, uri, {
+      headers: {
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+        "Content-Type": contentType,
+      },
+      httpMethod: "POST",
+      uploadType: 0 as any, // 0 solventa el problema de casteo nativo a Int en los enums de iOS
     });
-    
-    // Decodificar el string base64 a un búfer binario puro (ArrayBuffer)
-    const arrayBuffer = decode(base64);
 
-    // Subida asíncrona por medio del SDK Cliente de Supabase utilizando variables de entorno
-    const { data, error } = await supabase.storage
-      .from(env.supabaseBucket)
-      .upload(uniqueName, arrayBuffer, {
-        contentType: folder === "images" ? "image/jpeg" : "application/octet-stream",
-        upsert: true,
-      });
+    // Validar respuesta HTTP del servidor
+    if (response.status !== 200 && response.status !== 201) {
+      const errorData = JSON.parse(response.body || "{}");
+      throw new Error(errorData.message || `Error del servidor (Código ${response.status})`);
+    }
 
-    if (error) throw error;
-    return data;
+    return response.body;
   };
 
-  // 3. Funcionalidad: Orquestar el envío asíncrono con bloques try/catch
+  // 3. Funcionalidad: Orquestar el envío secuencial estructurado
   const handleUploadAll = async () => {
     if (!imageUri && !fileUri) {
       Alert.alert("Campos vacíos", "Por favor selecciona una imagen o un archivo antes de intentar subir.");
@@ -104,27 +117,25 @@ export default function StorageScreen() {
     setUploading(true);
 
     try {
-      // Subir la imagen procesada a la carpeta virtual /images
+      // 1. Subir primero la imagen si existe
       if (imageUri && imageName) {
-        await uploadToSupabase(imageUri, imageName, "images");
+        await uploadToSupabaseNative(imageUri, imageName, "images");
       }
 
-      // Subir el documento arbitrario a la carpeta virtual /documents
+      // 2. Subir el documento a la carpeta "Archivos" una vez que la imagen finalizó
       if (fileUri && fileName) {
-        await uploadToSupabase(fileUri, fileName, "documents");
+        await uploadToSupabaseNative(fileUri, fileName, "Archivos");
       }
 
-      // Retroalimentación visual de Éxito al concluir la operación remota
       Alert.alert("¡Subida Exitosa!", "Tus archivos fueron cargados correctamente en Supabase Storage.");
       
-      // Limpieza de estados visuales tras completar de forma correcta
+      // Limpieza de estados visuales tras el éxito
       setImageUri(null);
       setImageName(null);
       setFileUri(null);
       setFileName(null);
 
     } catch (error: any) {
-      // Retroalimentación de Error detallada al estudiante/docente
       console.error("Error completo en la transferencia:", error);
       Alert.alert("Error de Carga", error.message || "No se pudo sincronizar el archivo con la nube.");
     } finally {
@@ -182,7 +193,7 @@ export default function StorageScreen() {
         )}
       </View>
 
-      {/* --- CONTROLADORES DE CARGA Y FEEDBACK VISUAL --- */}
+      {/* --- CONTROLADORES DE CARGA --- */}
       <View style={styles.actionContainer}>
         {uploading ? (
           <View style={styles.loadingContainer}>
